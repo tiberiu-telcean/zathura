@@ -140,14 +140,7 @@ int RelationshipSnowflakeFilter(void* data, struct DiscordRelationship* relation
             relationship->user.id < app->user_id);
 }
 void OnRelationshipsRefresh(void* data)
-{
-    struct Application* app = (struct Application*)data;
-    struct DiscordActivity activity;
-    memset(&activity, 0, sizeof(activity));
-    sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, pages);
-
-    app->activities->update_activity(app->activities, &activity, app, UpdateActivityCallback);
-}
+{}
 
 void OnUserUpdated(void* data)
 {
@@ -173,6 +166,11 @@ void OnLobbyConnect(void* data, enum EDiscordResult result, struct DiscordLobby*
 }
 gboolean refresh(gpointer data)
 {
+    struct DiscordActivity activity;
+    memset(&activity, 0, sizeof(activity));
+    sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, pages);
+
+    app.activities->update_activity(app.activities, &activity, &app, UpdateActivityCallback);
     DISCORD_REQUIRE(app.core->run_callbacks(app.core));
     return 1;
 }
