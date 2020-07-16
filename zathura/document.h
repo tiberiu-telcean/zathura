@@ -6,10 +6,55 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <girara/types.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include <glib.h>
+
+
+#include "zathura.h"
+#include "page.h"
 
 #include "types.h"
 
+/**
+ * Document
+ */
+struct zathura_document_s {
+  char* file_path; /**< File path of the document */
+  char* uri; /**< URI of the document */
+  char* basename; /**< Basename of the document */
+  uint8_t hash_sha256[32]; /**< SHA256 hash of the document */
+  const char* password; /**< Password of the document */
+  unsigned int current_page_number; /**< Current page number */
+  unsigned int number_of_pages; /**< Number of pages */
+  double zoom; /**< Zoom value */
+  unsigned int rotate; /**< Rotation */
+  void* data; /**< Custom data */
+  zathura_adjust_mode_t adjust_mode; /**< Adjust mode (best-fit, width) */
+  int page_offset; /**< Page offset */
+  double cell_width; /**< width of a page cell in the document (not transformed by scale and rotation) */
+  double cell_height; /**< height of a page cell in the document (not transformed by scale and rotation) */
+  unsigned int view_width; /**< width of current viewport */
+  unsigned int view_height; /**< height of current viewport */
+  double view_ppi; /**< PPI of the current viewport */
+  zathura_device_factors_t device_factors; /**< x and y device scale factors (for e.g. HiDPI) */
+  unsigned int pages_per_row; /**< number of pages in a row */
+  unsigned int first_page_column; /**< column of the first page */
+  unsigned int page_padding; /**< padding between pages */
+  double position_x; /**< X adjustment */
+  double position_y; /**< Y adjustment */
+
+  /**
+   * Document pages
+   */
+  zathura_page_t** pages;
+
+  /**
+   * Used plugin
+   */
+  zathura_plugin_t* plugin;
+};
 /**
  * Open the document
  *

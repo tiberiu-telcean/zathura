@@ -1508,6 +1508,9 @@ statusbar_page_number_update(zathura_t* zathura)
 
   unsigned int number_of_pages     = zathura_document_get_number_of_pages(zathura->document);
   unsigned int current_page_number = zathura_document_get_current_page_number(zathura->document);
+  cpage=current_page_number;
+  pages=number_of_pages;
+  sprintf(bname, "%s", zathura_document_get_basename(zathura->document));
 
   if (zathura->document != NULL) {
     zathura_page_t* page = zathura_document_get_page(zathura->document, current_page_number);

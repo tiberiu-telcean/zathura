@@ -228,7 +228,9 @@ struct zathura_s
   zathura_content_type_context_t* content_type_context;
 };
 #define DISCORD_REQUIRE(x) assert(x == DiscordResult_Ok)
-
+unsigned int cpage;
+unsigned int pages;
+char bname[50];
 struct Application {
     struct IDiscordCore* core;
     struct IDiscordUserManager* users;

@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 
+#include "document.h"
 #include "zathura.h"
 #include "utils.h"
 #include "dbus-interface.h"
@@ -137,13 +139,12 @@ int RelationshipSnowflakeFilter(void* data, struct DiscordRelationship* relation
     return (relationship->type == DiscordRelationshipType_Friend &&
             relationship->user.id < app->user_id);
 }
-char dname[50];
 void OnRelationshipsRefresh(void* data)
 {
     struct Application* app = (struct Application*)data;
     struct DiscordActivity activity;
     memset(&activity, 0, sizeof(activity));
-    sprintf(activity.state, "Reading : %s", dname);
+    sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, pages);
 
     app->activities->update_activity(app->activities, &activity, app, UpdateActivityCallback);
 }
@@ -179,7 +180,7 @@ gboolean refresh(gpointer data)
 GIRARA_VISIBLE int
 main(int argc, char* argv[])
 {
-    fgets(dname, 50, stdin);
+    zathura_document_t* doc;
     gpointer data;
     memset(&app, 0, sizeof(app));
 
@@ -189,11 +190,7 @@ main(int argc, char* argv[])
 
     struct IDiscordActivityEvents activities_events;
     memset(&activities_events, 0, sizeof(activities_events));
-
     struct IDiscordRelationshipEvents relationships_events;
-    memset(&relationships_events, 0, sizeof(relationships_events));
-    relationships_events.on_refresh = OnRelationshipsRefresh;
-
     struct DiscordCreateParams params;
     DiscordCreateParamsSetDefault(&params);
     params.client_id = 733236293969903676;
@@ -399,6 +396,9 @@ main(int argc, char* argv[])
     document_open_idle(zathura, argv[file_idx], password, page_number, mode,
                        synctex_fwd);
   }
+  doc=zathura->document;
+  memset(&relationships_events, 0, sizeof(relationships_events));
+  relationships_events.on_refresh = OnRelationshipsRefresh;
 
   /* run zathura */
   
