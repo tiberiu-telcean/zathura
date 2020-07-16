@@ -208,8 +208,6 @@ main(int argc, char* argv[])
     app.lobbies->connect_lobby_with_activity_secret(
       app.lobbies, "invalid_secret", &app, OnLobbyConnect);
 
-    app.application->get_oauth2_token(app.application, &app, OnOAuth2Token);
-
     DiscordBranch branch;
     app.application->get_current_branch(app.application, &branch);
     printf("Current branch %s\n", branch);
