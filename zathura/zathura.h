@@ -7,6 +7,7 @@
 #include <girara/types.h>
 #include <girara/session.h>
 #include <gtk/gtk.h>
+#include <assert.h>
 #ifdef GDK_WINDOWING_X11
 #include <gtk/gtkx.h>
 #endif
@@ -14,6 +15,7 @@
 #include "types.h"
 #include "jumplist.h"
 #include "file-monitor.h"
+#include "discord_game_sdk.h"
 
 enum {
   NEXT,
@@ -225,6 +227,18 @@ struct zathura_s
    */
   zathura_content_type_context_t* content_type_context;
 };
+#define DISCORD_REQUIRE(x) assert(x == DiscordResult_Ok)
+
+struct Application {
+    struct IDiscordCore* core;
+    struct IDiscordUserManager* users;
+    struct IDiscordAchievementManager* achievements;
+    struct IDiscordActivityManager* activities;
+    struct IDiscordRelationshipManager* relationships;
+    struct IDiscordApplicationManager* application;
+    struct IDiscordLobbyManager* lobbies;
+    DiscordUserId user_id;
+};
 
 /**
  * Creates a zathura session
@@ -427,5 +441,5 @@ void statusbar_page_number_update(zathura_t* zathura);
  * return Printable filename. Free with g_free.
  */
 char* get_formatted_filename(zathura_t* zathura, bool statusbar);
-
+struct Application app;
 #endif // ZATHURA_H

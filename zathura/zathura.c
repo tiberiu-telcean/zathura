@@ -125,7 +125,6 @@ error_out:
 
   return NULL;
 }
-
 static void
 create_directories(zathura_t* zathura)
 {
