@@ -4,6 +4,8 @@ zathura - a document viewer
 zathura is a highly customizable and functional document viewer based on the
 girara user interface library and several document libraries.
 
+![rpc](https://www.github.com/tiberiu-telcean/zathura/discord.png "Rich presence in Discord]")
+
 Requirements
 ------------
 
