@@ -13,6 +13,7 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "document.h"
 #include "zathura.h"
@@ -127,21 +128,6 @@ void UpdateActivityCallback(void* data, enum EDiscordResult result)
     DISCORD_REQUIRE(result);
 }
 
-int RelationshipPassFilter(void* data, struct DiscordRelationship* relationship)
-{
-    return (relationship->type == DiscordRelationshipType_Friend);
-}
-
-int RelationshipSnowflakeFilter(void* data, struct DiscordRelationship* relationship)
-{
-    struct Application* app = (struct Application*)data;
-
-    return (relationship->type == DiscordRelationshipType_Friend &&
-            relationship->user.id < app->user_id);
-}
-void OnRelationshipsRefresh(void* data)
-{}
-
 void OnUserUpdated(void* data)
 {
     struct Application* app = (struct Application*)data;
@@ -149,25 +135,9 @@ void OnUserUpdated(void* data)
     app->users->get_current_user(app->users, &user);
     app->user_id = user.id;
 }
-
-void OnOAuth2Token(void* data, enum EDiscordResult result, struct DiscordOAuth2Token* token)
-{
-    if (result == DiscordResult_Ok) {
-        printf("OAuth2 token: %s\n", token->access_token);
-    }
-    else {
-        printf("GetOAuth2Token failed with %d\n", (int)result);
-    }
-}
-
-void OnLobbyConnect(void* data, enum EDiscordResult result, struct DiscordLobby* lobby)
-{
-    printf("LobbyConnect returned %d\n", (int)result);
-}
+struct DiscordActivity activity;
 gboolean refresh(gpointer data)
 {
-    struct DiscordActivity activity;
-    memset(&activity, 0, sizeof(activity));
     sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, (pages-1));
 
     app.activities->update_activity(app.activities, &activity, &app, UpdateActivityCallback);
@@ -178,9 +148,12 @@ gboolean refresh(gpointer data)
 GIRARA_VISIBLE int
 main(int argc, char* argv[])
 {
-    zathura_document_t* doc;
+    time_t rawtime;
     gpointer data;
     memset(&app, 0, sizeof(app));
+    memset(&activity, 0, sizeof(activity));
+    time ( &rawtime );
+    activity.timestamps.start=rawtime;
 
     struct IDiscordUserEvents users_events;
     memset(&users_events, 0, sizeof(users_events));
@@ -188,15 +161,11 @@ main(int argc, char* argv[])
 
     struct IDiscordActivityEvents activities_events;
     memset(&activities_events, 0, sizeof(activities_events));
-    struct IDiscordRelationshipEvents relationships_events;
     struct DiscordCreateParams params;
     DiscordCreateParamsSetDefault(&params);
     params.client_id = 733236293969903676;
     params.flags = DiscordCreateFlags_Default;
     params.event_data = &app;
-    params.activity_events = &activities_events;
-    params.relationship_events = &relationships_events;
-    params.user_events = &users_events;
     DISCORD_REQUIRE(DiscordCreate(DISCORD_VERSION, &params, &app.core));
 
     app.users = app.core->get_user_manager(app.core);
@@ -205,9 +174,6 @@ main(int argc, char* argv[])
     app.application = app.core->get_application_manager(app.core);
     app.lobbies = app.core->get_lobby_manager(app.core);
 
-    app.lobbies->connect_lobby_with_activity_secret(
-      app.lobbies, "invalid_secret", &app, OnLobbyConnect);
-
     DiscordBranch branch;
     app.application->get_current_branch(app.application, &branch);
     printf("Current branch %s\n", branch);
@@ -215,7 +181,6 @@ main(int argc, char* argv[])
     gdk_threads_init();
     gdk_threads_enter ();
     gdk_threads_add_idle(refresh, data);
-    app.relationships = app.core->get_relationship_manager(app.core);
   init_locale();
 
   /* parse command line arguments */
@@ -392,9 +357,6 @@ main(int argc, char* argv[])
     document_open_idle(zathura, argv[file_idx], password, page_number, mode,
                        synctex_fwd);
   }
-  doc=zathura->document;
-  memset(&relationships_events, 0, sizeof(relationships_events));
-  relationships_events.on_refresh = OnRelationshipsRefresh;
 
   /* run zathura */
   
