@@ -139,7 +139,10 @@ struct DiscordActivity activity;
 gboolean refresh(gpointer data)
 {
     sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, (pages-1));
-
+    struct DiscordActivityAssets assets;
+    memset(&assets, 0, sizeof(assets));
+    strcpy(assets.large_image, "zathura");
+    activity.assets = assets;
     app.activities->update_activity(app.activities, &activity, &app, UpdateActivityCallback);
     DISCORD_REQUIRE(app.core->run_callbacks(app.core));
     return 1;
@@ -375,6 +378,5 @@ free_and_ret:
   g_free(synctex_editor);
   g_free(synctex_fwd);
   g_free(mode);
-
   return ret;
 }
