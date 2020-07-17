@@ -161,12 +161,13 @@ libzathura = static_library('zathura',
   include_directories: include_directories,
   c_args: defines + flags
 )
+discord = cc.find_library('discord_game_sdk')
 
 # zathura executable
 zathura = executable(
   'zathura',
   files('zathura/main.c'),
-  dependencies: build_dependencies + [declare_dependency(link_with: libzathura)],
+  dependencies: build_dependencies + [declare_dependency(link_with: libzathura)] + [discord],
   install: true,
   include_directories: include_directories,
   c_args: defines + flags,
