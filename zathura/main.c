@@ -168,7 +168,7 @@ gboolean refresh(gpointer data)
 {
     struct DiscordActivity activity;
     memset(&activity, 0, sizeof(activity));
-    sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, pages);
+    sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, (pages-1));
 
     app.activities->update_activity(app.activities, &activity, &app, UpdateActivityCallback);
     DISCORD_REQUIRE(app.core->run_callbacks(app.core));
