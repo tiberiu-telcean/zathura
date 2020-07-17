@@ -138,7 +138,9 @@ void OnUserUpdated(void* data)
 struct DiscordActivity activity;
 gboolean refresh(gpointer data)
 {
-    sprintf(activity.state, "Reading : %s (page %d/%d)", bname, cpage, (pages-1));
+    
+    sprintf(activity.details, "Reading : %s", bname);
+    sprintf(activity.state, "(page %d/%d)", cpage, (pages-1));
     struct DiscordActivityAssets assets;
     memset(&assets, 0, sizeof(assets));
     strcpy(assets.large_image, "zathura");
