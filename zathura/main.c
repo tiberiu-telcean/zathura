@@ -136,9 +136,19 @@ void OnUserUpdated(void* data)
     app->user_id = user.id;
 }
 struct DiscordActivity activity;
+struct DiscordCreateParams params;
+struct IDiscordUserEvents users_events;
+struct IDiscordActivityEvents activities_events;
 gboolean refresh(gpointer data)
 {
-    
+    if(app.core == NULL) {
+	DISCORD_REQUIRE(DiscordCreate(DISCORD_VERSION, &params, &app.core));
+	app.users = app.core->get_user_manager(app.core);
+	app.achievements = app.core->get_achievement_manager(app.core);
+	app.activities = app.core->get_activity_manager(app.core);
+	app.application = app.core->get_application_manager(app.core);
+	app.lobbies = app.core->get_lobby_manager(app.core);
+    }
     sprintf(activity.details, "Reading : %s", bname);
     sprintf(activity.state, "(page %d/%d)", cpage, (pages-1));
     struct DiscordActivityAssets assets;
@@ -160,32 +170,19 @@ main(int argc, char* argv[])
     time ( &rawtime );
     activity.timestamps.start=rawtime;
 
-    struct IDiscordUserEvents users_events;
     memset(&users_events, 0, sizeof(users_events));
     users_events.on_current_user_update = OnUserUpdated;
 
-    struct IDiscordActivityEvents activities_events;
     memset(&activities_events, 0, sizeof(activities_events));
-    struct DiscordCreateParams params;
     DiscordCreateParamsSetDefault(&params);
     params.client_id = 733236293969903676;
     params.flags = DiscordCreateFlags_Default;
     params.event_data = &app;
-    DISCORD_REQUIRE(DiscordCreate(DISCORD_VERSION, &params, &app.core));
 
-    app.users = app.core->get_user_manager(app.core);
-    app.achievements = app.core->get_achievement_manager(app.core);
-    app.activities = app.core->get_activity_manager(app.core);
-    app.application = app.core->get_application_manager(app.core);
-    app.lobbies = app.core->get_lobby_manager(app.core);
-
-    DiscordBranch branch;
-    app.application->get_current_branch(app.application, &branch);
-    printf("Current branch %s\n", branch);
-    g_thread_init(NULL);
-    gdk_threads_init();
-    gdk_threads_enter ();
-    gdk_threads_add_idle(refresh, data);
+  g_thread_init(NULL);
+  gdk_threads_init();
+  gdk_threads_enter ();
+  gdk_threads_add_idle(refresh, data);
   init_locale();
 
   /* parse command line arguments */
